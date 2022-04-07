@@ -1,43 +1,14 @@
 <?php
-/**
- *  CoordinateTransformationLibrary - David Gustafsson 2012
- *
- *  RT90, SWEREF99 and WGS84 coordinate transformation library
- *
- * This library is a PHP port of the .NET library by Björn Sållarp.
- *  calculations are based entirely on the excellent
- *  javscript library by Arnold Andreassons.
- *
- * Source: http://www.lantmateriet.se/geodesi/
- * Source: Arnold Andreasson, 2007. http://mellifica.se/konsult
- * Source: Björn Sållarp. 2009. http://blog.sallarp.com
- * Source: Mathias Åhsberg, 2009. http://github.com/goober/
- * Author: David Gustafsson, 2012. http://github.com/david-xelera/
- *
- * License: http://creativecommons.org/licenses/by-nc-sa/3.0/
- */
 
+namespace Deployhuman\GpsTransformation\Position;
 
-require_once dirname(__FILE__) . '/../GaussKreuger.php';
-require_once dirname(__FILE__) . '/../Position.php';
+use Deployhuman\GpsTransformation\Enum\Grid;
+use Deployhuman\GpsTransformation\Enum\SWEREFProjection;
+use Deployhuman\GpsTransformation\Enum\WGS84Format;
+use Deployhuman\GpsTransformation\GaussKreuger;
 
-abstract class SWEREFProjection {
-  const sweref_99_tm = 0;
-  const sweref_99_12_00 = 1;
-  const sweref_99_13_30 = 2;
-  const sweref_99_15_00 = 3;
-  const sweref_99_16_30 = 4;
-  const sweref_99_18_00 = 5;
-  const sweref_99_14_15 = 6;
-  const sweref_99_15_45 = 7;
-  const sweref_99_17_15 = 8;
-  const sweref_99_18_45 = 9;
-  const sweref_99_20_15 = 10;
-  const sweref_99_21_45 = 11;
-  const sweref_99_23_1 = 12;
-}
-
-class SWEREF99Position extends Position {
+class SWEREF99Position extends Position
+{
 
   private $projection;
 
@@ -47,22 +18,27 @@ class SWEREF99Position extends Position {
    * @param e East value
    */
 
-  public function __construct() {
+  public function __construct()
+  {
     $args = func_get_args();
-    if(count($args) == 2) {
-      if(is_numeric($args[0]) && is_numeric($args[1])) {
+
+    if (count($args) == 2) {
+      if (is_numeric($args[0]) && is_numeric($args[1])) {
         $this->SWEREF99Position($args[0], $args[1]);
+        return;
       }
-      else if($args[0] instanceof WGS84Position && is_int($args[1]))  {
+      if ($args[0] instanceof WGS84Position && $args[1] instanceof SWEREFProjection) {
         $this->SWEREF99PositionPositionProjection($args[0], $args[1]);
       }
     }
-    else if(count($args) == 3) {
+
+    if (count($args) == 3) {
       $this->SWEREF99PositionProjection($args[0], $args[1], $args[2]);
     }
   }
 
-  private function SWEREF99Position($n, $e) {
+  private function SWEREF99Position($n, $e)
+  {
     parent::__construct($n, $e, Grid::SWEREF99);
     $this->projection = SWEREFProjection::sweref_99_tm;
   }
@@ -74,7 +50,8 @@ class SWEREF99Position extends Position {
    * @param e East value
    * @param projection Projection type
    */
-  private function SWEREF99PositionProjection($n, $e, $projection) {
+  private function SWEREF99PositionProjection($n, $e, $projection)
+  {
     parent::__construct($n, $e, Grid::SWEREF99);
     $this->projection = $projection;
   }
@@ -84,7 +61,8 @@ class SWEREF99Position extends Position {
    * @param position WGS84 position to convert
    * @param projection Projection to convert to
    */
-  private function SWEREF99PositionPositionProjection(WGS84Position $position, $projection) {
+  private function SWEREF99PositionPositionProjection(WGS84Position $position, $projection)
+  {
     parent::__construct(Grid::SWEREF99);
     $gkProjection = new GaussKreuger();
     $gkProjection->swedish_params($this->getProjectionString($projection));
@@ -94,9 +72,11 @@ class SWEREF99Position extends Position {
 
   /**
    * Convert the position to WGS84 format
-   * @return
+   *
+   * @return WGS84Position
    */
-  public function toWGS84() {
+  public function toWGS84(): WGS84Position
+  {
     $gkProjection = new GaussKreuger();
     $gkProjection->swedish_params($this->getProjectionString($this->projection));
     $lat_lon = $gkProjection->grid_to_geodetic($this->latitude, $this->longitude);
@@ -110,8 +90,9 @@ class SWEREF99Position extends Position {
    * Get projection type as String
    * @return
    */
-  private function getProjectionString($projection = NULL) {
-    if(!isset($projection)) {
+  private function getProjectionString($projection = NULL)
+  {
+    if (!isset($projection)) {
       $projection = $this->projection;
     }
 
@@ -148,7 +129,8 @@ class SWEREF99Position extends Position {
   }
 
   //@Override
-  public function __toString() {
+  public function __toString()
+  {
     return sprintf("N: %F E: %F Projection: %s", $this->latitude, $this->longitude, $this->getProjectionString());
   }
 }
