@@ -4,6 +4,7 @@ namespace Deployhuman\GpsTransformation\Position;
 
 use Deployhuman\GpsTransformation\Enum\Grid;
 use Deployhuman\GpsTransformation\Enum\SWEREFProjection;
+use Deployhuman\GpsTransformation\Enum\WGS84Format;
 use Deployhuman\GpsTransformation\GaussKreuger;
 
 class SWEREF99Position extends Position
@@ -20,13 +21,18 @@ class SWEREF99Position extends Position
   public function __construct()
   {
     $args = func_get_args();
+
     if (count($args) == 2) {
       if (is_numeric($args[0]) && is_numeric($args[1])) {
         $this->SWEREF99Position($args[0], $args[1]);
-      } else if ($args[0] instanceof WGS84Position && is_int($args[1])) {
+        return;
+      }
+      if ($args[0] instanceof WGS84Position && $args[1] instanceof SWEREFProjection) {
         $this->SWEREF99PositionPositionProjection($args[0], $args[1]);
       }
-    } else if (count($args) == 3) {
+    }
+
+    if (count($args) == 3) {
       $this->SWEREF99PositionProjection($args[0], $args[1], $args[2]);
     }
   }
@@ -66,9 +72,10 @@ class SWEREF99Position extends Position
 
   /**
    * Convert the position to WGS84 format
-   * @return
+   *
+   * @return WGS84Position
    */
-  public function toWGS84()
+  public function toWGS84(): WGS84Position
   {
     $gkProjection = new GaussKreuger();
     $gkProjection->swedish_params($this->getProjectionString($this->projection));

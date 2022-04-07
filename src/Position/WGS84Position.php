@@ -13,28 +13,34 @@ class WGS84Position extends Position
   public function __construct()
   {
     $args = func_get_args();
+
     if (empty($args)) {
       //Create a new WGS84 position with empty coordinates
       parent::__construct(Grid::WGS84);
-    } else if (count($args) == 2) {
-      if (is_numeric($args[0]) && is_numeric($args[1])) {
-        //Create a new WGS84 position with latitude and longitude
-        parent::__construct($args[0], $args[1], Grid::WGS84);
-      } else if (is_string($args[0]) && is_int($args[1])) {
-        parent::__construct(Grid::WGS84);
-        $this->WGS84PositionString($args[0], $args[1]);
-      }
+      return;
+    }
+
+    if (count($args) != 2) return;
+
+    if (is_numeric($args[0]) && is_numeric($args[1])) {
+      //Create a new WGS84 position with latitude and longitude
+      parent::__construct($args[0], $args[1], Grid::WGS84);
+      return;
+    }
+
+    if (is_string($args[0]) && $args[1] instanceof WGS84Format) {
+      parent::__construct(Grid::WGS84);
+      $this->WGS84PositionString($args[0], $args[1]);
     }
   }
 
   /**
    * Create a new WGS84 position from a String containing both latitude
    * and longitude. The string is parsed based on the supplied format.
-   * @param positionString
-   * @param format
-   * @throws java.lang.Exception
+   * @param string $positionString
+   * @param WGS84Format $format
    */
-  private function WGS84PositionString($positionString, $format)
+  private function WGS84PositionString(string $positionString, WGS84Format $format)
   {
     if ($format == WGS84Format::Degrees) {
       $positionString = trim($positionString);
@@ -45,7 +51,8 @@ class WGS84Position extends Position
       } else {
         throw new ParseException("The position string is invalid");
       }
-    } else if ($format == WGS84Format::DegreesMinutes || $format == WGS84Format::DegreesMinutesSeconds) {
+    }
+    if ($format == WGS84Format::DegreesMinutes || $format == WGS84Format::DegreesMinutesSeconds) {
       $firstValueEndPos = 0;
 
       if ($format == WGS84Format::DegreesMinutes) {
@@ -81,10 +88,10 @@ class WGS84Position extends Position
 
   /**
    * Set the longitude value from a string. The string is parsed based on given format.
-   * @param value
-   * @param format
+   * @param string $value
+   * @param WGS84Format $format
    */
-  public function setLongitudeFromString($value, $format)
+  public function setLongitudeFromString(string $value, WGS84Format $format)
   {
     $value = trim($value);
 
@@ -96,12 +103,13 @@ class WGS84Position extends Position
       $this->longitude = doubleval($value);
     }
   }
+
   /**
    * Returns a string representation in the given format
    * @param format
-   * @return
+   * @return string
    */
-  public function latitudeToString($format)
+  public function latitudeToString($format): string
   {
     if ($format == WGS84Format::DegreesMinutes) {
       return $this->convToDmString($this->latitude, 'N', 'S');
@@ -111,12 +119,13 @@ class WGS84Position extends Position
       return strval($this->latitude);
     }
   }
+
   /**
    * Returns a string represenation in the given format
    * @param format
-   * @return
+   * @return string
    */
-  public function longitudeToString($format)
+  public function longitudeToString($format): string
   {
     if ($format == WGS84Format::DegreesMinutes) {
       return $this->convToDmString($this->longitude, 'E', 'W');

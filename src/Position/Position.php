@@ -2,12 +2,14 @@
 
 namespace Deployhuman\GpsTransformation\Position;
 
+use Deployhuman\GpsTransformation\Enum\Grid;
+
 abstract class Position
 {
 
   protected $latitude;
   protected $longitude;
-  protected $gridFormat;
+  protected Grid $gridFormat;
 
   public function __construct()
   {
@@ -27,10 +29,17 @@ abstract class Position
     $this->gridFormat = $format;
   }
 
-  private function setPositionFormat($format)
+  /**
+   * Sets Grid Format
+   *
+   * @param Grid $format
+   * @return self
+   */
+  private function setPositionFormat(Grid $format): self
   {
     //@todo: validation?
     $this->gridFormat = $format;
+    return $this;
   }
 
   public function getLatitude()

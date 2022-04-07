@@ -17,11 +17,16 @@ class RT90Position extends Position
     if (count($args) == 2) {
       if (is_numeric($args[0]) && is_numeric($args[1])) {
         $this->RT90Position($args[0], $args[1]);
-      } else if ($args[0] instanceof WGS84Position && is_int($args[1])) {
-        $this->RT90PositionPositionProjection($args[0], $args[1]);
+        return;
       }
-    } else if (count($args) == 3) {
+      if ($args[0] instanceof WGS84Position && $args[1] instanceof RT90Projection) {
+        $this->RT90PositionPositionProjection($args[0], $args[1]);
+        return;
+      }
+    }
+    if (count($args) == 3) {
       $this->RT90PositionProjection($args[0], $args[1], $args[2]);
+      return;
     }
   }
 
