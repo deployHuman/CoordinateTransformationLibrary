@@ -26,7 +26,7 @@ To install using [Composer](http://getcomposer.org/)
 
 Just type 
 
-`composer require deployhuman/CoordinateTransformationLibrary`
+`composer require deployhuman/gps-transformation dev-master`
 
 
 License: http://creativecommons.org/licenses/by-nc-sa/3.0/
